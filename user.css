@@ -1,0 +1,16 @@
+.topbar,
+.eu-cookie-notice,
+.SignupCallOut,
+.follow-bar,
+.stream-item-footer,
+.Footer {
+  display: none;
+}
+
+.AppContent {
+  padding-top: 14px !important;
+}
+
+.permalink {
+  margin-bottom: 0 !important;
+}
