@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import tweepy
 
 import os
@@ -19,11 +21,17 @@ def main():
     auth.set_access_token(os.environ['TWITTER_ACCESS_TOKEN'], os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
 
     api = tweepy.API(auth)
-    tweets = api.search(query)
+    tweets = api.search(query, count=100)
     log.info("Got {} tweets".format(len(tweets)))
 
-    frames = list(get_frames(tweets))
+    urls = list(get_frame_urls(tweets))
+    log.info("Using {} tweets".format(len(urls)))
+
+    frames = list(get_frames(urls))
     log.info("Made {} frames".format(len(frames)))
+
+    if len(frames) == 0:
+        return
 
     gif_filename = make_gif(frames)
     log.info("Wrote {}".format(gif_filename))
@@ -40,8 +48,8 @@ def make_gif(frames):
     return gif_filename
 
 
-def get_frames(tweets):
-    for url in get_frame_urls(tweets):
+def get_frames(urls):
+    for url in urls:
         _, filename = tempfile.mkstemp('.png', dir=temp_dir)
         cmd = [
             'wkhtmltoimage',
@@ -56,6 +64,10 @@ def get_frames(tweets):
 
 def get_frame_urls(tweets):
     for t in tweets:
+        if '@' in t.text:
+            log.info("Skipping: {}".format(t.text))
+            continue
+
         media = t.entities.get('media', [])
         photos = [m for m in media if m.get('type') == 'photo']
         if len(photos) > 0:
